@@ -5,6 +5,7 @@ const PORT = 5000;
 const pool = require('./db');
 const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
+const loginRouter = require('./routes/login');
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,7 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+app.use('/api', loginRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/comments', commentsRouter);
 
