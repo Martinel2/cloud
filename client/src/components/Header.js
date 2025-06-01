@@ -34,11 +34,11 @@ function Header({ user, onLogin, onLogout }) {
       </div>
       <div style={{ marginRight: 36, display: 'flex', alignItems: 'center', gap: 12 }}>
         {!isWritePage && (
-          <button onClick={() => navigate('/posts/new')} style={writeBtnStyle}>글 작성</button>
+          <button onClick={() => user ? navigate('/posts/new') : onLogin()} style={writeBtnStyle}>글 작성</button>
         )}
         {user ? (
           <>
-            <span style={{ color: '#fff', fontWeight: 600, marginRight: 16 }}>{user}</span>
+            <span style={{ color: '#fff', fontWeight: 600, marginRight: 16 }}>{user.username}</span>
             <button onClick={onLogout} style={loginBtnStyle}>로그아웃</button>
           </>
         ) : (
@@ -59,6 +59,9 @@ const loginBtnStyle = {
   fontSize: 16,
   cursor: 'pointer',
   boxShadow: '0 2px 8px #a5d6a7',
+  whiteSpace: 'nowrap',
+  minWidth: '120px',
+  textAlign: 'center'
 };
 
 const writeBtnStyle = {

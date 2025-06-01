@@ -10,7 +10,7 @@ const CONTENT_TEMPLATE = `모임 시간:
 모인 인원:
 추가사항:`;
 
-function PostForm() {
+function PostForm({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -20,24 +20,38 @@ function PostForm() {
     age_group: '',
     skill_level: '',
     member_count: '',
+    author: user ? user.username : '',
+    is_recruiting: 1,
   });
   const isEdit = !!id;
 
   useEffect(() => {
     if (isEdit) {
-      fetch(`/api/posts/${id}`)
+      fetch(`http://localhost:5000/api/posts/${id}`)
         .then(res => res.json())
-        .then(data => setForm({
-          title: data.post.title,
-          content: data.post.content || CONTENT_TEMPLATE,
-          region: data.post.region,
-          age_group: data.post.age_group,
-          skill_level: data.post.skill_level,
-          member_count: data.post.member_count,
-        }));
+        .then(data => {
+          if (data.ok) {
+            // 작성자 확인
+            if (user && data.post.author !== user.username) {
+              alert('본인이 작성한 글만 수정할 수 있습니다.');
+              navigate('/posts');
+              return;
+            }
+            
+            setForm({
+              title: data.post.title,
+              content: data.post.content || CONTENT_TEMPLATE,
+              region: data.post.region,
+              age_group: data.post.age_group,
+              skill_level: data.post.skill_level,
+              member_count: data.post.member_count,
+              author: data.post.author,
+              is_recruiting: data.post.is_recruiting,
+            });
+          }
+        });
     }
-    // eslint-disable-next-line
-  }, [id]);
+  }, [id, user, navigate]);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,14 +66,35 @@ function PostForm() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    
     const method = isEdit ? 'PUT' : 'POST';
-    const url = isEdit ? `/api/posts/${id}` : '/api/posts';
-    await fetch(url, {
+    const url = isEdit ? `http://localhost:5000/api/posts/${id}` : 'http://localhost:5000/api/posts';
+    
+    // 현재 로그인한 사용자의 이름과 진행중 상태를 저장
+    const postData = {
+      ...form,
+      author: user.username,
+      is_recruiting: isEdit ? form.is_recruiting : 1
+    };
+    
+    const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify(postData)
     });
-    navigate('/posts');
+    
+    const data = await response.json();
+    if (data.ok) {
+      navigate('/posts');
+    } else {
+      alert('게시글 저장 중 오류가 발생했습니다.');
+    }
   };
 
   const listBtnStyle = {
