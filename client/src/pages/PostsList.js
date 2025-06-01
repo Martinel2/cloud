@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LABELS = {
-  '1': { text: '진행중', color: '#4caf50' },
-  '0': { text: '모집완료', color: '#f44336' },
+const getLabel = (is_recruiting) => {
+  if (is_recruiting === true || is_recruiting === 1 || is_recruiting === '1') {
+    return { text: '진행중', color: '#4caf50' };
+  } else {
+    return { text: '모집완료', color: '#f44336' };
+  }
 };
 
 const TAG_COLORS = ['#1976d2', '#ff9800', '#8e24aa']; // 지역, 연령대, 실력
@@ -31,16 +34,39 @@ function getTagColor(tag, idx) {
   return '#607d8b';
 }
 
-function PostsList() {
+function PostsList({ user }) {
   const [posts, setPosts] = useState([]);
   const [showRecruiting, setShowRecruiting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/posts${showRecruiting ? '?recruiting=true' : ''}`)
+    fetch(`http://localhost:5000/api/posts${showRecruiting ? '?recruiting=true' : ''}`)
       .then(res => res.json())
-      .then(data => setPosts(data.posts || []));
+      .then(data => {
+        if (data.ok) {
+          console.log('게시글 목록:', data.posts);
+          if (data.posts && data.posts.length > 0) {
+            console.log('첫 번째 게시글 is_recruiting 값:', {
+              value: data.posts[0].is_recruiting,
+              type: typeof data.posts[0].is_recruiting,
+              stringValue: String(data.posts[0].is_recruiting)
+            });
+          }
+          setPosts(data.posts || []);
+        }
+      })
+      .catch(err => console.error('게시글 목록 조회 오류:', err));
   }, [showRecruiting]);
+
+  const getRecruitingLabel = (is_recruiting) => {
+    console.log('getRecruitingLabel 호출:', {
+      is_recruiting,
+      type: typeof is_recruiting,
+      stringValue: String(is_recruiting),
+      label: getLabel(is_recruiting)
+    });
+    return getLabel(is_recruiting);
+  };
 
   return (
     <div style={{
@@ -53,7 +79,7 @@ function PostsList() {
       alignItems: 'center',
     }}>
       <div style={{ maxWidth: 900, width: '100%', margin: '0 auto', marginTop: 32 }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18, alignItems: 'center' }}>
           <label style={{ color: '#fff', fontWeight: 600, fontSize: 15, background: 'rgba(0,0,0,0.08)', borderRadius: 8, padding: '4px 12px' }}>
             <input type="checkbox" checked={showRecruiting} onChange={e => setShowRecruiting(e.target.checked)} style={{ marginRight: 6 }} />
             진행중만 표시
@@ -84,6 +110,9 @@ function PostsList() {
         {posts.map(post => {
           const memberTagColor = getMemberTagColor(post.member_count);
           const tags = [post.region, post.age_group, post.skill_level].filter(Boolean);
+          const recruitingLabel = getRecruitingLabel(post.is_recruiting);
+          console.log('게시글 ID:', post.id, '상태:', post.is_recruiting, '라벨:', recruitingLabel);
+          
           return (
             <div
               key={post.id}
@@ -108,13 +137,13 @@ function PostsList() {
                   textAlign: 'center',
                   padding: '4px 0',
                   borderRadius: 12,
-                  background: LABELS[String(post.is_recruiting)]?.color,
+                  background: recruitingLabel.color,
                   color: '#fff',
                   fontWeight: 700,
                   fontSize: 15,
                   marginRight: 6,
                   flexShrink: 0,
-                }}>{LABELS[String(post.is_recruiting)]?.text}</span>
+                }}>{recruitingLabel.text}</span>
               </span>
               <span style={{ minWidth: 90, textAlign: 'center', flex: 1 }}>
                 <span style={{

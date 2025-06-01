@@ -41,7 +41,7 @@ pool.query(`
 */
 
 // 회원가입 API
-app.post('/api/register', async (req, res) => {
+router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
@@ -51,7 +51,7 @@ app.post('/api/register', async (req, res) => {
         }
 
         // 이메일 중복 확인
-        const [existingUser] = await pool.promise().query(
+        const [existingUser] = await pool.query(
             'SELECT * FROM users WHERE email = ?',
             [email]
         );
@@ -64,7 +64,7 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // 사용자 정보 저장
-        await pool.promise().query(
+        await pool.query(
             'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
             [username, email, hashedPassword]
         );
@@ -77,33 +77,53 @@ app.post('/api/register', async (req, res) => {
 });
 
 // 로그인 API
-app.post('/api/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // 요청 정보 로깅
+        console.log('로그인 시도:', { email });
+
         // 유효성 검사
         if (!email || !password) {
+            console.log('유효성 검사 실패: 이메일 또는 비밀번호 누락');
             return res.status(400).json({ error: '이메일과 비밀번호를 입력해주세요.' });
         }
 
-        // 사용자 조회
-        const [users] = await pool.promise().query(
-            'SELECT * FROM users WHERE email = ?',
-            [email]
-        );
+        try {
+            // 사용자 조회
+            const [users] = await pool.query(
+                'SELECT * FROM users WHERE email = ?',
+                [email]
+            );
 
-        if (users.length === 0) {
-            return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+            console.log('사용자 조회 결과:', { found: users.length > 0 });
+
+            if (users.length === 0) {
+                return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+            }
+
+            // 비밀번호 확인
+            const isValidPassword = await bcrypt.compare(password, users[0].password);
+            console.log('비밀번호 확인:', { isValid: isValidPassword });
+
+            if (!isValidPassword) {
+                return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+            }
+
+            // 비밀번호는 제외하고 사용자 정보 반환
+            const user = { 
+                id: users[0].id,
+                username: users[0].username,
+                email: users[0].email
+            };
+
+            console.log('로그인 성공:', { username: users[0].username });
+            res.json({ message: '로그인 성공!', user });
+        } catch (dbError) {
+            console.error('데이터베이스 조회 오류:', dbError);
+            res.status(500).json({ error: '데이터베이스 조회 중 오류가 발생했습니다.' });
         }
-
-        // 비밀번호 확인
-        const isValidPassword = await bcrypt.compare(password, users[0].password);
-
-        if (!isValidPassword) {
-            return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
-        }
-
-        res.json({ message: '로그인 성공!' });
     } catch (error) {
         console.error('로그인 오류:', error);
         res.status(500).json({ error: '서버 오류가 발생했습니다.' });
@@ -113,3 +133,5 @@ app.post('/api/login', async (req, res) => {
 //app.listen(port, () => {
 //    console.log(`서버가 포트 ${port}에서 실행 중입니다.`);
 //});
+
+module.exports = router;
