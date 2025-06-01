@@ -1,0 +1,76 @@
+/* 전체 컨테이너 스타일 */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #2e7d32;
+}
+
+/* 폼 컨테이너 스타일 */
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background-color:#e8f5e9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #4caf50;
+}
+
+/* 폼 그룹 스타일 */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  color: #2e7d32;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #4caf50;
+  box-sizing: border-box;
+}
+
+/* 버튼 스타일 */
+button {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+button[type="submit"] {
+  background-color: #4caf50;
+}
+
+button:not([type="submit"]) {
+  background-color: #81c784;
+}
+
+/* 메시지 스타일 */
+.message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  text-align: center;
+  background-color: #c8e6c9;
+  border-radius: 4px;
+  color: #2e7d32;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+
+
+
