@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { AppContext } from '../context/userContext'
 // 라벨 처리 함수 추가
 const getLabel = (is_recruiting) => {
   // 불리언이나 숫자를 문자열로 변환
@@ -36,11 +36,13 @@ function getTagColor(tag, idx) {
   return '#607d8b';
 }
 
+
 function PostDetail({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  const { globalUser, setGlobalUser } = useContext(AppContext);
   const [commentText, setCommentText] = useState('');
   const [isApplicant, setIsApplicant] = useState(false);
   const [isAuthor, setIsAuthor] = useState(false);
@@ -160,6 +162,15 @@ function PostDetail({ user }) {
     setEditCommentId(commentId);
     setEditCommentText(content);
   };
+
+  //메세지로 이동
+  async function navigateMessage(author, userId, navigate) {
+    await fetch(`/api/chat/search/${author}/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      navigate('/messages', { state: { chatId: data.chat_id } });
+    });
+  }
 
   // 댓글 수정 저장 함수
   const saveEditComment = async (commentId) => {
@@ -330,7 +341,8 @@ function PostDetail({ user }) {
             댓글을 작성하려면 <button onClick={() => navigate('/login')} style={{ background: 'transparent', color: '#1976d2', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 16, textDecoration: 'underline' }}>로그인</button> 해주세요.
           </div>
         )}
-      </div>
+              </div>
+              <button onClick={async() => await navigateMessage(post.author, globalUser, navigate)} style={listBtnStyle}>메시지 보내기</button>
 
       {/* 댓글 목록 (스크롤 형식) */}
       <div style={{ 

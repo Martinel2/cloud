@@ -5,6 +5,8 @@ import PostDetail from './pages/PostDetail';
 import PostForm from './pages/PostForm';
 import Header from './components/Header';
 import Login from './pages/Login';
+import ChatList from './pages/ChatList';
+import MessageScreen from './pages/MessageScreen';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -45,6 +47,9 @@ function AppContent() {
           user ? <PostForm user={user} /> : <Navigate to="/login" />
         } />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
+
+        <Route path="/chats" element={<ChatList />} />
+        <Route path="/messages" element={<MessageScreen />} />
       </Routes>
     </>
   );

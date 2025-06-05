@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState , useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { AppContext } from '../context/userContext'
 import './Login.css';
 
 function Login({ onLogin }) {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true); // true: 로그인 폼, false: 회원가입 폼
+  const { globalUser, setGlobalUser } = useContext(AppContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
@@ -27,6 +30,7 @@ function Login({ onLogin }) {
       if (response.ok) {
         setMessage('환영합니다!');
         onLogin(data.user); // 서버에서 받은 사용자 정보로 로그인 상태 업데이트
+        setGlobalUser(data.user.username);
         navigate('/posts');
       } else {
         setMessage(data.error);

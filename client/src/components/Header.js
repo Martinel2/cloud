@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { AppContext } from '../context/userContext'
 
 function Header({ user, onLogin, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { globalUser, setGlobalUser } = useContext(AppContext);
   const isWritePage = location.pathname.startsWith('/posts/new') || location.pathname.endsWith('/edit');
   return (
     <header style={{
@@ -36,9 +38,17 @@ function Header({ user, onLogin, onLogout }) {
         {!isWritePage && (
           <button onClick={() => user ? navigate('/posts/new') : onLogin()} style={writeBtnStyle}>글 작성</button>
         )}
+
+        {globalUser ? (<button onClick={() => {
+          if (!globalUser) {
+            alert("로그인이 필요한 기능입니다.")
+          }
+          else {
+            navigate('/chats');
+          }
+        }} style={writeBtnStyle}>채팅</button>) : (null)}
         {user ? (
           <>
-            <span style={{ color: '#fff', fontWeight: 600, marginRight: 16 }}>{user.username}</span>
             <button onClick={onLogout} style={loginBtnStyle}>로그아웃</button>
           </>
         ) : (
@@ -48,21 +58,6 @@ function Header({ user, onLogin, onLogout }) {
     </header>
   );
 }
-
-const loginBtnStyle = {
-  background: '#fff',
-  color: '#388e3c',
-  border: 'none',
-  borderRadius: 8,
-  padding: '8px 22px',
-  fontWeight: 700,
-  fontSize: 16,
-  cursor: 'pointer',
-  boxShadow: '0 2px 8px #a5d6a7',
-  whiteSpace: 'nowrap',
-  minWidth: '120px',
-  textAlign: 'center'
-};
 
 const writeBtnStyle = {
   background: 'linear-gradient(90deg, #388e3c 60%, #43a047 100%)',
@@ -76,5 +71,15 @@ const writeBtnStyle = {
   boxShadow: '0 2px 8px #a5d6a7',
   letterSpacing: 1,
 };
-
+const loginBtnStyle = {
+  background: '#fff',
+  color: '#388e3c',
+  border: 'none',
+  borderRadius: 8,
+  padding: '8px 22px',
+  fontWeight: 700,
+  fontSize: 16,
+  cursor: 'pointer',
+  boxShadow: '0 2px 8px #a5d6a7',
+};
 export default Header;
