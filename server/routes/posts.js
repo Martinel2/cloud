@@ -4,6 +4,7 @@ const pool = require('../db');
 
 // 게시글 목록 조회 (진행중/완료 필터, 태그 포함)
 router.get('/', async (req, res) => {
+  console.log("in post/");
   try {
     const { recruiting } = req.query; // ?recruiting=true/false
     let query = 'SELECT * FROM posts';

@@ -5,10 +5,15 @@ const PORT = 5000;
 const pool = require('./db');
 const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
-const loginRouter = require('./routes/login');
+const chatRouter = require('./routes/chat');
+const loginRouter = require('./routes/login')
+const http = require('http');
+const { Server } = require('socket.io');
 
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
 
 // 데이터베이스 테이블 초기화
 async function initDatabase() {
@@ -82,6 +87,77 @@ async function initDatabase() {
 // 서버 시작 시 데이터베이스 초기화
 initDatabase();
 
+function isoToMysqlDatetime(isoString) {
+  // 1. 'Z' 제거
+  let s = isoString.replace('Z', '');
+  // 2. 'T'를 공백으로 변환
+  s = s.replace('T', ' ');
+  // 3. 소수점 이하 3자리로 자르기 (MySQL에서 milli까지 지원)
+  s = s.replace(/(\.\d{3})\d*/, '$1');
+  return s;
+}
+
+io.on('connection', (socket) => {
+  // 채팅방 입장
+  socket.on('joinRoom', async ({ chatId, userId }) => {
+    console.log("joined room");
+    //console.log(chatId);
+    socket.join(chatId);
+    await pool.query(
+      'UPDATE message_table SET message_read = 1 WHERE chat_id = ? AND writer_id <> ?',
+      [chatId, userId]
+    );
+    // 이전 메시지 불러오기
+    const [rows] = await pool.query(
+      'SELECT writer_id AS sender, message_text AS text, message_time AS time FROM message_table WHERE chat_id = ? ORDER BY message_time ASC',
+      [chatId]
+    );
+    //console.log(rows);
+    socket.emit('previousMessages', rows);
+  });
+
+  socket.on('joinChatList', async ({ userId }) => {
+    console.log('joinChatList')
+    // 이전 메시지 불러오기
+    const [rows] = await pool.query(
+      'SELECT chat_id FROM chat_table WHERE chat_user_1 = ? OR chat_user_2 = ?',
+      [userId, userId]
+    );
+    for (const chat of rows) {
+      socket.join(chat.chat_id);
+    }
+  });
+
+  // 메시지 전송
+  socket.on('sendMessage', async (msg) => {
+
+    // DB 저장
+    await pool.query(
+      'INSERT INTO message_table (writer_id, reciever_id, message_time, message_text, message_read, chat_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [msg.sender, '', isoToMysqlDatetime(msg.time), msg.text, 0, msg.chatId]
+    );
+    // 같은 방의 모든 클라이언트에 메시지 전송
+    io.to(msg.chatId).emit('receiveMessage', msg);
+  });
+
+  socket.on('leftRoom', async ({ chatId, userId }) => {
+    console.log("lefted room");
+    //console.log(chatId);
+    await pool.query(
+      'UPDATE message_table SET message_read = 1 WHERE chat_id = ? AND writer_id <> ?',
+      [chatId, userId]
+    );
+    socket.leave(chatId);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+});
+
+app.use(cors());
+app.use(express.json());
+
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from server!' });
 });
@@ -95,10 +171,16 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
-app.use('/api', loginRouter);
+// Express 라우트는 여기에 작성
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
 app.use('/api/posts', postsRouter);
 app.use('/api/comments', commentsRouter);
-
-app.listen(PORT, () => {
+app.use('/api/chat', chatRouter);
+app.use('/api', loginRouter);
+// 수정 후
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
