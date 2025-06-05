@@ -20,6 +20,42 @@ USE `recruit_board`;
 --
 -- Table structure for table `comments`
 --
+DROP TABLE IF EXISTS `chat_table`;
+
+CREATE TABLE `chat_table` (
+  `chat_table_id` int NOT NULL AUTO_INCREMENT,
+  `chat_id` int NOT NULL,
+  `chat_user_1` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `chat_user_2` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`chat_table_id`,`chat_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `message_table`;
+
+CREATE TABLE `message_table` (
+  `message_id` int NOT NULL AUTO_INCREMENT,
+  `writer_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reciever_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `message_time` datetime NOT NULL,
+  `message_text` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message_read` int NOT NULL DEFAULT '0',
+  `chat_id` int NOT NULL,
+  PRIMARY KEY (`message_id`,`writer_id`,`chat_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SELECT * FROM recruit_board.users;
+
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 DROP TABLE IF EXISTS `comments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
