@@ -1,0 +1,51 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main  # 배포 브랜치
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Docker Hub 로그인 (선택)
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: SSH 키 설정 및 호스트 인증
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.AZURE_VM_IP }} >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: 전체 프로젝트 Azure VM에 업로드
+        run: |
+          rsync -avz --progress --exclude 'node_modules' --exclude '.git' \
+          -e "ssh -i private_key.pem" ./ \
+          ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:/home/${{ secrets.AZURE_VM_USER }}/project/
+
+      - name: Azure VM에서 Docker Compose로 배포
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/${{ secrets.AZURE_VM_USER }}/project
+
+            # 필요한 환경 변수 파일 생성
+            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" > .env
+            echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
+
+            # Docker Compose 배포
+            docker-compose down || true
+            docker-compose up -d --build
+
+      - name: SSH 키 제거
+        run: rm -f private_key.pem
