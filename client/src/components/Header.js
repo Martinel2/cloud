@@ -1,13 +1,18 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/userContext';
 
 function Header({ user, onLogin, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { globalUser } = useContext(AppContext);
+  const { globalUser, setGlobalUser } = useContext(AppContext);
   const isWritePage = location.pathname.startsWith('/posts/new') || location.pathname.endsWith('/edit');
-
+  useEffect(()=>{
+    if (user) {
+      setGlobalUser(user.username);
+    }
+  },[user])
+  
   return (
     <header style={{
       width: '100%',
@@ -42,9 +47,13 @@ function Header({ user, onLogin, onLogout }) {
           </div>
         )}
 
-        {globalUser && (
+        {user && (
           <div style={{ display: 'flex' }}>
-            <button onClick={() => navigate('/chats')} style={buttonStyle}>채팅</button>
+            <button onClick={async() => {
+              await setGlobalUser(user.username);
+                navigate('/chats')
+              }
+              } style={buttonStyle}>채팅</button>
           </div>
         )}
 

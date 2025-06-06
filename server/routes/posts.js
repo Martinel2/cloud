@@ -202,4 +202,48 @@ router.post('/:id/cancel', async (req, res) => {
   }
 });
 
+// 게시글의 모든 신청자 목록 조회 API (게시글 작성자 전용)
+router.get('/:id/all-applicants', async (req, res) => {
+  const postId = req.params.id;
+  const { author } = req.query; // 요청한 사용자 (작성자 확인용)
+  
+  if (!author) {
+    return res.status(400).json({ ok: false, error: '작성자 정보가 필요합니다.' });
+  }
+  
+  try {
+    // 게시글 정보 조회
+    const [posts] = await pool.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ ok: false, error: '게시글을 찾을 수 없습니다.' });
+    }
+    
+    // 작성자 확인
+    const post = posts[0];
+    if (post.author !== author) {
+      return res.status(403).json({ ok: false, error: '게시글 작성자만 신청자 목록을 조회할 수 있습니다.' });
+    }
+    
+    // 신청자 목록 조회
+    const [applicants] = await pool.query(
+      'SELECT * FROM post_applicants WHERE post_id = ? ORDER BY applied_at DESC',
+      [postId]
+    );
+    
+    res.json({ 
+      ok: true, 
+      post: {
+        id: post.id,
+        title: post.title,
+        member_count: post.member_count
+      },
+      applicants: applicants,
+      total: applicants.length
+    });
+  } catch (err) {
+    console.error('신청자 목록 조회 오류:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 module.exports = router; 

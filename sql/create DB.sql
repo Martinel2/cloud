@@ -42,7 +42,7 @@ CREATE TABLE `message_table` (
   `chat_id` int NOT NULL,
   PRIMARY KEY (`message_id`,`writer_id`,`chat_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SELECT * FROM recruit_board.users;
+
 
 DROP TABLE IF EXISTS `users`;
 
