@@ -7,11 +7,11 @@ services:
       context: ./server
       dockerfile: Dockerfile
     environment:
-      DB_HOST: ${{ secrets.MYSQL_HOST }}
+      DB_HOST: ${MYSQL_HOST}
       DB_PORT: 3306
       DB_NAME: recruit_board
       DB_USER: azureuser
-      DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "5000:5000"
     networks:
