@@ -1,12 +1,13 @@
 import React, { useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AppContext } from '../context/userContext'
+import { AppContext } from '../context/userContext';
 
 function Header({ user, onLogin, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { globalUser, setGlobalUser } = useContext(AppContext);
+  const { globalUser } = useContext(AppContext);
   const isWritePage = location.pathname.startsWith('/posts/new') || location.pathname.endsWith('/edit');
+
   return (
     <header style={{
       width: '100%',
@@ -36,50 +37,46 @@ function Header({ user, onLogin, onLogout }) {
       </div>
       <div style={{ marginRight: 36, display: 'flex', alignItems: 'center', gap: 12 }}>
         {!isWritePage && (
-          <button onClick={() => user ? navigate('/posts/new') : onLogin()} style={writeBtnStyle}>글 작성</button>
+          <div style={{ display: 'flex' }}>
+            <button onClick={() => user ? navigate('/posts/new') : onLogin()} style={buttonStyle}>글 작성</button>
+          </div>
         )}
 
-        {globalUser ? (<button onClick={() => {
-          if (!globalUser) {
-            alert("로그인이 필요한 기능입니다.")
-          }
-          else {
-            navigate('/chats');
-          }
-        }} style={writeBtnStyle}>채팅</button>) : (null)}
-        {user ? (
-          <>
-            <button onClick={onLogout} style={loginBtnStyle}>로그아웃</button>
-          </>
-        ) : (
-          <button onClick={onLogin} style={loginBtnStyle}>로그인</button>
+        {globalUser && (
+          <div style={{ display: 'flex' }}>
+            <button onClick={() => navigate('/chats')} style={buttonStyle}>채팅</button>
+          </div>
         )}
+
+        <div style={{ display: 'flex' }}>
+          {user ? (
+            <button onClick={onLogout} style={buttonStyle}>로그아웃</button>
+          ) : (
+            <button onClick={onLogin} style={buttonStyle}>로그인</button>
+          )}
+        </div>
       </div>
     </header>
   );
 }
 
-const writeBtnStyle = {
-  background: 'linear-gradient(90deg, #388e3c 60%, #43a047 100%)',
-  color: '#fff',
+const buttonStyle = {
+  background: '#fff',
+  color: '#388e3c',
   border: 'none',
-  borderRadius: 10,
-  padding: '10px 22px',
+  borderRadius: 8,
+  padding: '10px 24px',
   fontWeight: 700,
   fontSize: 16,
   cursor: 'pointer',
   boxShadow: '0 2px 8px #a5d6a7',
   letterSpacing: 1,
+  minWidth: 100,
+  textAlign: 'center',
+  height: 42,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center'
 };
-const loginBtnStyle = {
-  background: '#fff',
-  color: '#388e3c',
-  border: 'none',
-  borderRadius: 8,
-  padding: '8px 22px',
-  fontWeight: 700,
-  fontSize: 16,
-  cursor: 'pointer',
-  boxShadow: '0 2px 8px #a5d6a7',
-};
+
 export default Header;

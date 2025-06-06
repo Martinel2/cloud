@@ -332,9 +332,10 @@ function PostDetail({ user }) {
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-end', gap: 12, width: '100%' }}>
         {user ? (
           <>
-            <div style={{ width: 160, fontSize: 16, padding: 10, borderRadius: 8, border: '2px solid #fff', background: '#e8f5e9', fontWeight: 600, marginRight: 12 }}>{user.username}</div>
-            <textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="댓글 내용" rows={3} style={{ flex: 3, fontSize: 16, padding: 12, borderRadius: 10, border: '2px solid #fff', background: '#f1f8e9', resize: 'vertical', fontWeight: 500, minHeight: 60, marginRight: 0 }} />
+            <textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="댓글 내용" rows={3} style={{ flex: 7, fontSize: 16, padding: 12, borderRadius: 10, border: '2px solid #fff', background: '#f1f8e9', resize: 'vertical', fontWeight: 500, minHeight: 60, marginRight: 0 }} />
             <button onClick={handleComment} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>댓글 작성</button>
+            <button onClick={async() => await navigateMessage(post.author, globalUser, navigate)} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>메시지 보내기</button>
+
           </>
         ) : (
           <div style={{ width: '100%', textAlign: 'center', padding: 15, background: '#f1f8e9', borderRadius: 10, color: '#388e3c', fontWeight: 600 }}>
@@ -342,8 +343,7 @@ function PostDetail({ user }) {
           </div>
         )}
               </div>
-              <button onClick={async() => await navigateMessage(post.author, globalUser, navigate)} style={listBtnStyle}>메시지 보내기</button>
-
+              
       {/* 댓글 목록 (스크롤 형식) */}
       <div style={{ 
         maxHeight: '400px', 

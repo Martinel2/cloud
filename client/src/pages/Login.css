@@ -4,7 +4,8 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #2e7d32;
+  background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 100%);
+
 }
 
 /* 폼 컨테이너 스타일 */
@@ -15,7 +16,7 @@
   background-color:#e8f5e9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 2px solid #4caf50;
+  border: 2px solid #59d05d;
 }
 
 /* 폼 그룹 스타일 */

@@ -9,8 +9,6 @@ const getLabel = (is_recruiting) => {
   }
 };
 
-const TAG_COLORS = ['#1976d2', '#ff9800', '#8e24aa']; // 지역, 연령대, 실력
-
 const REGION_COLORS = {
   '서울': '#1976d2', '경기': '#388e3c', '인천': '#0288d1', '부산': '#ff7043', '대구': '#8d6e63', '기타': '#607d8b'
 };
@@ -22,9 +20,9 @@ const SKILL_COLORS = {
 };
 
 function getMemberTagColor(memberCount) {
-  if (memberCount >= 8) return '#4caf50'; // 초록
-  if (memberCount >= 5) return '#ff9800'; // 주황
-  return '#f44336'; // 빨강
+  if (memberCount >= 8) return '#4caf50';
+  if (memberCount >= 5) return '#ff9800';
+  return '#f44336';
 }
 
 function getTagColor(tag, idx) {
@@ -44,43 +42,25 @@ function PostsList({ user }) {
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
-          console.log('게시글 목록:', data.posts);
-          if (data.posts && data.posts.length > 0) {
-            console.log('첫 번째 게시글 is_recruiting 값:', {
-              value: data.posts[0].is_recruiting,
-              type: typeof data.posts[0].is_recruiting,
-              stringValue: String(data.posts[0].is_recruiting)
-            });
-          }
           setPosts(data.posts || []);
         }
       })
       .catch(err => console.error('게시글 목록 조회 오류:', err));
   }, [showRecruiting]);
 
-  const getRecruitingLabel = (is_recruiting) => {
-    console.log('getRecruitingLabel 호출:', {
-      is_recruiting,
-      type: typeof is_recruiting,
-      stringValue: String(is_recruiting),
-      label: getLabel(is_recruiting)
-    });
-    return getLabel(is_recruiting);
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #43a047 80%, #fff 100%)',
+      background: 'linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 100%)',
       paddingTop: 60,
       paddingBottom: 60,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
     }}>
-      <div style={{ maxWidth: 900, width: '100%', margin: '0 auto', marginTop: 32 }}>
+      <div style={{ maxWidth: 960, width: '100%', margin: '0 auto', marginTop: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18, alignItems: 'center' }}>
-          <label style={{ color: '#fff', fontWeight: 600, fontSize: 15, background: 'rgba(0,0,0,0.08)', borderRadius: 8, padding: '4px 12px' }}>
+          <label style={{ color: '#444', fontWeight: 600, fontSize: 14, background: '#e0e0e0', borderRadius: 8, padding: '4px 12px' }}>
             <input type="checkbox" checked={showRecruiting} onChange={e => setShowRecruiting(e.target.checked)} style={{ marginRight: 6 }} />
             진행중만 표시
           </label>
@@ -88,31 +68,29 @@ function PostsList({ user }) {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          background: 'rgba(255,255,255,0.85)',
-          borderRadius: 14,
-          boxShadow: '0 1px 4px #b0c4de',
-          marginBottom: 18,
-          padding: '12px 24px',
+          background: '#ffffff',
+          borderRadius: 12,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+          marginBottom: 24,
+          padding: '20px 24px',
           fontWeight: 700,
           fontSize: 16,
-          color: '#388e3c',
+          color: '#333',
           gap: 18,
         }}>
-          <span style={{ minWidth: 70, textAlign: 'center', flex: 0.8 }}>상태</span>
-          <span style={{ minWidth: 90, textAlign: 'center', flex: 1 }}>모집인원</span>
-          <div style={{ display: 'flex', alignItems: 'center', flex: 2.5, minWidth: 0 }}>
-            <span style={{ textAlign: 'center', width: '100%' }}>제목</span>
-          </div>
-          <span style={{ flex: 1, minWidth: 90, textAlign: 'center' }}>작성자</span>
-          <span style={{ flex: 1, minWidth: 110, textAlign: 'center' }}>작성일</span>
-          <span style={{ flex: 0.7, minWidth: 60, textAlign: 'right' }}>조회수</span>
+          <span style={{ flex: 0.8, textAlign: 'center' }}>상태</span>
+          <span style={{ flex: 1, textAlign: 'center' }}>모집인원</span>
+          <span style={{ flex: 2.5 }}>제목</span>
+          <span style={{ flex: 1, textAlign: 'center' }}>작성자</span>
+          <span style={{ flex: 1, textAlign: 'center' }}>작성일</span>
+          <span style={{ flex: 0.7, textAlign: 'right' }}>조회수</span>
         </div>
+
         {posts.map(post => {
           const memberTagColor = getMemberTagColor(post.member_count);
           const tags = [post.region, post.age_group, post.skill_level].filter(Boolean);
-          const recruitingLabel = getRecruitingLabel(post.is_recruiting);
-          console.log('게시글 ID:', post.id, '상태:', post.is_recruiting, '라벨:', recruitingLabel);
-          
+          const { text, color } = getLabel(post.is_recruiting);
+
           return (
             <div
               key={post.id}
@@ -121,80 +99,67 @@ function PostsList({ user }) {
                 display: 'flex',
                 alignItems: 'center',
                 background: '#fff',
-                borderRadius: 18,
-                boxShadow: '0 2px 8px #b0c4de33',
-                marginBottom: 18,
+                borderRadius: 12,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                marginBottom: 16,
                 padding: '16px 24px',
-                fontSize: 17,
+                fontSize: 15,
                 color: '#333',
                 gap: 18,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease-in-out'
               }}
             >
-              <span style={{ minWidth: 70, textAlign: 'center', flex: 0.8 }}>
+              <span style={{ flex: 0.8, textAlign: 'center' }}>
                 <span style={{
                   display: 'inline-block',
-                  minWidth: 70,
-                  textAlign: 'center',
-                  padding: '4px 0',
-                  borderRadius: 12,
-                  background: recruitingLabel.color,
+                  minWidth: 64,
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  background: color,
                   color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  marginRight: 6,
-                  flexShrink: 0,
-                }}>{recruitingLabel.text}</span>
+                  fontWeight: 600,
+                  fontSize: 14,
+                }}>{text}</span>
               </span>
-              <span style={{ minWidth: 90, textAlign: 'center', flex: 1 }}>
+              <span style={{ flex: 1, textAlign: 'center' }}>
                 <span style={{
                   display: 'inline-block',
-                  minWidth: 70,
-                  textAlign: 'center',
-                  padding: '4px 0',
-                  borderRadius: 12,
+                  minWidth: 64,
+                  padding: '6px 10px',
+                  borderRadius: 10,
                   background: memberTagColor,
                   color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  marginRight: 10,
-                  flexShrink: 0,
+                  fontWeight: 600,
+                  fontSize: 14,
                 }}>{post.member_count}명</span>
               </span>
-              <div style={{ display: 'flex', alignItems: 'center', flex: 2.5, minWidth: 0 }}>
+              <div style={{ flex: 2.5, overflow: 'hidden' }}>
                 <span style={{
                   fontWeight: 700,
-                  fontSize: 18,
+                  fontSize: 16,
                   color: '#222',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  minWidth: 0,
-                  maxWidth: 220,
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
+                  whiteSpace: 'nowrap'
                 }}>{post.title}</span>
-                {tags.length > 0 && (
-                  <span style={{ display: 'inline-flex', gap: 4, marginLeft: 10, flexShrink: 0, verticalAlign: 'middle' }}>
-                    {tags.map((tag, i) => (
-                      <span key={i} style={{
-                        display: 'inline-block',
-                        background: getTagColor(tag, i),
-                        color: '#fff',
-                        borderRadius: 8,
-                        padding: '2px 10px',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        marginLeft: 0,
-                        whiteSpace: 'nowrap',
-                        verticalAlign: 'middle',
-                      }}>{tag}</span>
-                    ))}
-                  </span>
-                )}
+                <span style={{ display: 'inline-flex', gap: 6, marginLeft: 8 }}>
+                  {tags.map((tag, i) => (
+                    <span key={i} style={{
+                      background: getTagColor(tag, i),
+                      color: '#fff',
+                      borderRadius: 8,
+                      padding: '2px 8px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap'
+                    }}>{tag}</span>
+                  ))}
+                </span>
               </div>
-              <span style={{ flex: 1, minWidth: 90, textAlign: 'center', color: '#388e3c', fontWeight: 600, fontSize: 15 }}>{post.author}</span>
-              <span style={{ flex: 1, minWidth: 110, textAlign: 'center', color: '#888', fontSize: 14 }}>{new Date(post.created_at).toLocaleDateString()}</span>
-              <span style={{ flex: 0.7, minWidth: 60, textAlign: 'right', color: '#607d8b', fontWeight: 700, fontSize: 15 }}>{post.views}</span>
+              <span style={{ flex: 1, textAlign: 'center', color: '#388e3c', fontWeight: 600 }}>{post.author}</span>
+              <span style={{ flex: 1, textAlign: 'center', color: '#777' }}>{new Date(post.created_at).toLocaleDateString()}</span>
+              <span style={{ flex: 0.7, textAlign: 'right', color: '#999', fontWeight: 700 }}>{post.views}</span>
             </div>
           );
         })}
@@ -203,4 +168,4 @@ function PostsList({ user }) {
   );
 }
 
-export default PostsList; 
+export default PostsList;

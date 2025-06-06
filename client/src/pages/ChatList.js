@@ -6,7 +6,6 @@ const SOCKET_URL = 'http://localhost:5000'; // 서버 주소에 맞게 수정
 
 function updateChatList(chats, setChats, loading, setLoading, error, setError, globalUser) {
   if (!globalUser) return;
-
     setLoading(true);
     setError('');
     fetch(`/api/chat/${globalUser}`)
