@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { AppContext } from '../context/userContext'
 const getLabel = (is_recruiting) => {
   if (is_recruiting === true || is_recruiting === 1 || is_recruiting === '1') {
     return { text: '진행중', color: '#4caf50' };
@@ -35,8 +36,9 @@ function getTagColor(tag, idx) {
 function PostsList({ user }) {
   const [posts, setPosts] = useState([]);
   const [showRecruiting, setShowRecruiting] = useState(false);
+  
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     fetch(`http://localhost:5000/api/posts${showRecruiting ? '?recruiting=true' : ''}`)
       .then(res => res.json())

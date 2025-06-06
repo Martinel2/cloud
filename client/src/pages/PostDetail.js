@@ -51,6 +51,11 @@ function PostDetail({ user }) {
   const [totalPages, setTotalPages] = useState(1);
   const [editCommentId, setEditCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
+  const [replyToId, setReplyToId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [showApplicants, setShowApplicants] = useState(false);
+  const [applicants, setApplicants] = useState([]);
+  const [loadingApplicants, setLoadingApplicants] = useState(false);
   const commentsPerPage = 5;
 
   useEffect(() => {
@@ -106,6 +111,34 @@ function PostDetail({ user }) {
         }
       });
   };
+
+
+  const isAuthorScreenControl = () => {
+
+    if (!user) {
+      return (
+        <>
+        <div style={{ width: '100%', textAlign: 'center', padding: 15, background: '#f1f8e9', borderRadius: 10, color: '#388e3c', fontWeight: 600 }}>
+        댓글을 작성하려면 <button onClick={() => navigate('/login')} style={{ background: 'transparent', color: '#1976d2', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 16, textDecoration: 'underline' }}>로그인</button> 해주세요.
+        </div>
+      </>
+      )
+    }
+    else if (!isAuthor) {
+      return (
+        <>
+        <textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="댓글 내용" rows={3} style={{ flex: 7, fontSize: 16, padding: 12, borderRadius: 10, border: '2px solid #fff', background: '#f1f8e9', resize: 'vertical', fontWeight: 500, minHeight: 60, marginRight: 0 }} />
+        <button onClick={handleComment} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>댓글 작성</button>
+        <button onClick={async () => await navigateMessage(post.author, globalUser, navigate)} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>메시지 보내기</button>
+      </>
+      )
+    }
+    else {
+      return (
+        <></>
+      )
+    }
+  }
 
   const handleApply = async () => {
     if (!user) {
@@ -165,6 +198,7 @@ function PostDetail({ user }) {
 
   //메세지로 이동
   async function navigateMessage(author, userId, navigate) {
+    await setGlobalUser(userId);
     await fetch(`/api/chat/search/${author}/${userId}`)
     .then(res => res.json())
     .then(data => {
@@ -223,9 +257,69 @@ function PostDetail({ user }) {
     }
   };
 
+  // 대댓글 작성 처리 함수
+  const handleReply = async () => {
+    if (!replyText || !user || !replyToId) {
+      if (!user) alert('답글을 작성하려면 로그인이 필요합니다.');
+      return;
+    }
+    
+    await fetch('http://localhost:5000/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        post_id: id, 
+        content: replyText, 
+        author: user.username, 
+        parent_id: replyToId 
+      })
+    });
+    
+    // 폼 초기화
+    setReplyText('');
+    setReplyToId(null);
+    
+    // 댓글 목록 새로고침
+    fetch(`http://localhost:5000/api/comments/post/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          setComments(data.comments || []);
+        }
+      });
+  };
+
   // 페이지 변경 함수
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  // 신청자 목록 조회 함수
+  const fetchApplicants = async () => {
+    if (!user || !isAuthor) return;
+    
+    try {
+      setLoadingApplicants(true);
+      const response = await fetch(`http://localhost:5000/api/posts/${id}/all-applicants?author=${encodeURIComponent(user.username)}`);
+      const data = await response.json();
+      
+      if (data.ok) {
+        setApplicants(data.applicants || []);
+        setShowApplicants(true);
+      } else {
+        alert(data.error || '신청자 목록을 불러오는데 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('신청자 목록 조회 오류:', error);
+      alert('신청자 목록을 불러오는데 오류가 발생했습니다.');
+    } finally {
+      setLoadingApplicants(false);
+    }
+  };
+  
+  // 모달 닫기 함수
+  const closeApplicantsModal = () => {
+    setShowApplicants(false);
   };
 
   if (loading || !post) return <div>로딩중...</div>;
@@ -289,6 +383,18 @@ function PostDetail({ user }) {
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => navigate(`/posts/${id}/edit`)} style={editBtnStyle}>수정</button>
             <button style={deleteBtnStyle}>삭제</button>
+            <button 
+              onClick={fetchApplicants} 
+              style={{
+                ...editBtnStyle,
+                background: '#6a1b9a',
+                color: '#fff',
+                boxShadow: '0 2px 8px #ce93d8'
+              }}
+              disabled={loadingApplicants}
+            >
+              {loadingApplicants ? '로딩중...' : '신청자 확인'}
+            </button>
           </div>
         )}
       </div>
@@ -330,20 +436,8 @@ function PostDetail({ user }) {
       </div>
       {/* 댓글 입력 */}
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-end', gap: 12, width: '100%' }}>
-        {user ? (
-          <>
-            <textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="댓글 내용" rows={3} style={{ flex: 7, fontSize: 16, padding: 12, borderRadius: 10, border: '2px solid #fff', background: '#f1f8e9', resize: 'vertical', fontWeight: 500, minHeight: 60, marginRight: 0 }} />
-            <button onClick={handleComment} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>댓글 작성</button>
-            <button onClick={async() => await navigateMessage(post.author, globalUser, navigate)} style={{ ...commentBtnStyle, flex: 1, minWidth: 0, borderRadius: '0 10px 10px 0', height: 60, fontSize: 18, marginLeft: 12 }}>메시지 보내기</button>
-
-          </>
-        ) : (
-          <div style={{ width: '100%', textAlign: 'center', padding: 15, background: '#f1f8e9', borderRadius: 10, color: '#388e3c', fontWeight: 600 }}>
-            댓글을 작성하려면 <button onClick={() => navigate('/login')} style={{ background: 'transparent', color: '#1976d2', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 16, textDecoration: 'underline' }}>로그인</button> 해주세요.
-          </div>
-        )}
-              </div>
-              
+        {isAuthorScreenControl()}
+      </div>'              
       {/* 댓글 목록 (스크롤 형식) */}
       <div style={{ 
         maxHeight: '400px', 
@@ -363,6 +457,15 @@ function PostDetail({ user }) {
           editCommentText={editCommentText}
           setEditCommentText={setEditCommentText}
           saveEditComment={saveEditComment}
+          replyToId={replyToId}
+          setReplyToId={setReplyToId}
+          replyText={replyText}
+          setReplyText={setReplyText}
+          handleReply={handleReply}
+          isPostAuthor={isAuthor}
+          globalUser={globalUser}
+          navigate={navigate}
+          navigateMessage={navigateMessage}
         />
       </div>
       
@@ -422,6 +525,126 @@ function PostDetail({ user }) {
       <div style={{ position: 'absolute', left: '10%', top: '10%', width: 4, height: '80%', background: '#fff', opacity: 0.2, borderRadius: 2 }} />
       <div style={{ position: 'absolute', right: '10%', top: '10%', width: 4, height: '80%', background: '#fff', opacity: 0.2, borderRadius: 2 }} />
       <div style={{ position: 'absolute', left: '50%', top: 0, width: 4, height: '100%', background: '#fff', opacity: 0.08, borderRadius: 2 }} />
+      
+      {/* 신청자 목록 모달 */}
+      {showApplicants && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: 16,
+            padding: 24,
+            width: '90%',
+            maxWidth: 600,
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: '#2e7d32', fontSize: 24, fontWeight: 700 }}>신청자 목록</h3>
+              <button 
+                onClick={closeApplicantsModal}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: '#757575'
+                }}
+              >
+                &times;
+              </button>
+            </div>
+            
+            {applicants.length === 0 ? (
+              <div style={{ 
+                padding: 24, 
+                textAlign: 'center', 
+                color: '#757575', 
+                borderRadius: 8, 
+                backgroundColor: '#f5f5f5' 
+              }}>
+                신청자가 없습니다.
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom: 16, color: '#616161', fontSize: 16 }}>
+                  총 <strong>{applicants.length}</strong>명이 신청했습니다.
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#e8f5e9', borderBottom: '2px solid #c8e6c9' }}>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#2e7d32' }}>사용자</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#2e7d32' }}>신청일시</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#2e7d32' }}>메시지</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applicants.map((applicant, index) => (
+                      <tr 
+                        key={applicant.id} 
+                        style={{ 
+                          borderBottom: '1px solid #e0e0e0',
+                          backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafafa'
+                        }}
+                      >
+                        <td style={{ padding: '12px 16px', fontWeight: 500 }}>{applicant.user_name}</td>
+                        <td style={{ padding: '12px 16px', color: '#757575' }}>
+                          {new Date(applicant.applied_at).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <button 
+                            onClick={async() => await navigateMessage(applicant.user_name, globalUser, navigate)}
+                            style={{
+                              background: '#e3f2fd',
+                              color: '#1976d2',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '6px 12px',
+                              fontSize: 14,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            메시지 보내기
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            <div style={{ marginTop: 24, textAlign: 'right' }}>
+              <button 
+                onClick={closeApplicantsModal}
+                style={{
+                  background: '#2e7d32',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '10px 24px',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -435,7 +658,7 @@ const editBtnStyle = {
   fontWeight: 700,
   fontSize: 16,
   cursor: 'pointer',
-  boxShadow: '0 2px 8px #b0c4de',
+  boxShadow: '0 2px 8px rgb(45, 190, 125)',
 };
 const deleteBtnStyle = {
   background: '#f44336',
@@ -511,7 +734,16 @@ function CommentTree({
   editCommentId, 
   editCommentText, 
   setEditCommentText,
-  saveEditComment
+  saveEditComment,
+  replyToId,
+  setReplyToId,
+  replyText,
+  setReplyText,
+  handleReply,
+  isPostAuthor,
+  globalUser,
+  navigate,
+  navigateMessage
 }) {
   return (
     <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
@@ -535,30 +767,16 @@ function CommentTree({
               </span>
             </div>
             
-            {/* 댓글 작성자만 수정/삭제 버튼 표시 */}
-            {!comment.is_deleted && user && comment.author === user.username && (
-              <div style={{ display: 'flex', gap: 8 }}>
-                {editCommentId === comment.id ? (
-                  <button 
-                    onClick={() => saveEditComment(comment.id)} 
-                    style={{ 
-                      background: '#4caf50', 
-                      color: 'white', 
-                      border: 'none', 
-                      borderRadius: 4, 
-                      padding: '4px 8px', 
-                      fontSize: 13, 
-                      cursor: 'pointer' 
-                    }}
-                  >
-                    저장
-                  </button>
-                ) : (
-                  <>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {/* 댓글 작성자만 수정/삭제 버튼 표시 */}
+              {!comment.is_deleted && user && comment.author === user.username && (
+                <>
+                  {editCommentId === comment.id ? (
                     <button 
-                      onClick={() => onEdit(comment.id, comment.content)} 
+                      onClick={() => saveEditComment(comment.id)} 
                       style={{ 
-                        background: '#f0f0f0', 
+                        background: '#4caf50', 
+                        color: 'white', 
                         border: 'none', 
                         borderRadius: 4, 
                         padding: '4px 8px', 
@@ -566,26 +784,88 @@ function CommentTree({
                         cursor: 'pointer' 
                       }}
                     >
-                      수정
+                      저장
                     </button>
-                    <button 
-                      onClick={() => onDelete(comment.id)} 
-                      style={{ 
-                        background: '#ffebee', 
-                        color: '#e53935', 
-                        border: 'none', 
-                        borderRadius: 4, 
-                        padding: '4px 8px', 
-                        fontSize: 13, 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      삭제
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => onEdit(comment.id, comment.content)} 
+                        style={{ 
+                          background: '#f0f0f0', 
+                          border: 'none', 
+                          borderRadius: 4, 
+                          padding: '4px 8px', 
+                          fontSize: 13, 
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        수정
+                      </button>
+                      <button 
+                        onClick={() => onDelete(comment.id)} 
+                        style={{ 
+                          background: '#ffebee', 
+                          color: '#e53935', 
+                          border: 'none', 
+                          borderRadius: 4, 
+                          padding: '4px 8px', 
+                          fontSize: 13, 
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        삭제
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* 게시글 작성자에게만 댓글 작성자에게 메시지 보내기 버튼 표시 */}
+              {!comment.is_deleted && isPostAuthor && user && comment.author !== user.username && (
+                <button 
+                  onClick={async() => await navigateMessage(comment.author, user.username, navigate)}
+                  style={{ 
+                    background: '#e8f5e9', 
+                    color: '#1b5e20', 
+                    border: 'none', 
+                    borderRadius: 4, 
+                    padding: '4px 8px', 
+                    fontSize: 13, 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>✉</span> 메시지
+                </button>
+              )}
+              
+              {/* 모든 사용자에게 답글 버튼 표시 (삭제된 댓글 제외) */}
+              {!comment.is_deleted && user && (
+                <button 
+                  onClick={() => {
+                    if (replyToId === comment.id) {
+                      setReplyToId(null); // 답글 폼 닫기
+                    } else {
+                      setReplyToId(comment.id); // 답글 폼 열기
+                      setReplyText(''); // 답글 내용 초기화
+                    }
+                  }}
+                  style={{ 
+                    background: '#e3f2fd', 
+                    color: '#1976d2', 
+                    border: 'none', 
+                    borderRadius: 4, 
+                    padding: '4px 8px', 
+                    fontSize: 13, 
+                    cursor: 'pointer' 
+                  }}
+                >
+                  {replyToId === comment.id ? '취소' : '답글'}
+                </button>
+              )}
+            </div>
           </div>
           
           {!comment.is_deleted && (
@@ -612,6 +892,43 @@ function CommentTree({
             </>
           )}
           
+          {/* 답글 작성 폼 */}
+          {replyToId === comment.id && (
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <textarea 
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                placeholder="답글 작성..."
+                style={{
+                  flex: 7,
+                  fontSize: 16,
+                  padding: 12,
+                  borderRadius: 10,
+                  border: '2px solid #fff',
+                  background: '#f1f8e9',
+                  resize: 'vertical',
+                  fontWeight: 500,
+                  minHeight: 60,
+                  marginRight: 0
+                }}
+              />
+              <button
+                onClick={handleReply}
+                style={{
+                  ...commentBtnStyle,
+                  flex: 1,
+                  minWidth: 0,
+                  borderRadius: '0 10px 10px 0',
+                  height: 60,
+                  fontSize: 18,
+                  marginLeft: 12
+                }}
+              >
+                등록
+              </button>
+            </div>
+          )}
+          
           {/* 대댓글 렌더링 */}
           {comment.children && comment.children.length > 0 && (
             <CommentTree 
@@ -623,6 +940,15 @@ function CommentTree({
               editCommentText={editCommentText}
               setEditCommentText={setEditCommentText}
               saveEditComment={saveEditComment}
+              replyToId={replyToId}
+              setReplyToId={setReplyToId}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              handleReply={handleReply}
+              isPostAuthor={isPostAuthor}
+              globalUser={globalUser}
+              navigate={navigate}
+              navigateMessage={navigateMessage}
             />
           )}
         </li>
