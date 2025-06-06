@@ -1,6 +1,5 @@
 const mysql = require('mysql2/promise');
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config({ path: '/app/.env' }); // 기존 config() → 명시적으로 경로 지정
 
 // 데이터베이스 연결 정보 로깅
 console.log('데이터베이스 연결 정보:', { 
