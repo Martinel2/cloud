@@ -27,7 +27,7 @@ function PostForm({ user }) {
 
   useEffect(() => {
     if (isEdit) {
-      fetch(`http://localhost:5000/api/posts/${id}`)
+      fetch(`http://20.5.129.23:5000/api/posts/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.ok) {
@@ -74,7 +74,7 @@ function PostForm({ user }) {
     }
     
     const method = isEdit ? 'PUT' : 'POST';
-    const url = isEdit ? `http://localhost:5000/api/posts/${id}` : 'http://localhost:5000/api/posts';
+    const url = isEdit ? `http://20.5.129.23:5000/api/posts/${id}` : 'http://20.5.129.23:5000/api/posts';
     
     // 현재 로그인한 사용자의 이름과 진행중 상태를 저장
     const postData = {

@@ -40,7 +40,7 @@ function PostsList({ user }) {
   const navigate = useNavigate();
   
   useEffect(() => {
-    fetch(`http://localhost:5000/api/posts${showRecruiting ? '?recruiting=true' : ''}`)
+    fetch(`http://20.5.129.23:5000/api/posts${showRecruiting ? '?recruiting=true' : ''}`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) {

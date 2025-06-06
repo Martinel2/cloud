@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { AppContext } from '../context/userContext';
-const SOCKET_URL = 'http://localhost:5000'; // 서버 주소에 맞게 수정
+const SOCKET_URL = 'http://20.5.129.23:5000'; // 서버 주소에 맞게 수정
 
 function updateChatList(chats, setChats, loading, setLoading, error, setError, globalUser) {
   if (!globalUser) return;

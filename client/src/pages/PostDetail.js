@@ -59,7 +59,7 @@ function PostDetail({ user }) {
   const commentsPerPage = 5;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/posts/${id}`)
+    fetch(`http://20.5.129.23:5000/api/posts/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
@@ -69,7 +69,7 @@ function PostDetail({ user }) {
           
           // 모집 신청 여부를 함께 확인
           if (user) {
-            fetch(`http://localhost:5000/api/posts/${id}/applicants?user_name=${encodeURIComponent(user.username)}`)
+            fetch(`http://20.5.129.23:5000/api/posts/${id}/applicants?user_name=${encodeURIComponent(user.username)}`)
               .then(res => res.json())
               .then(applicantData => {
                 if (applicantData.ok) {
@@ -82,7 +82,7 @@ function PostDetail({ user }) {
         }
       });
       
-    fetch(`http://localhost:5000/api/comments/post/${id}`)
+    fetch(`http://20.5.129.23:5000/api/comments/post/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
@@ -97,13 +97,13 @@ function PostDetail({ user }) {
       return;
     }
     
-    await fetch('http://localhost:5000/api/comments', {
+    await fetch('http://20.5.129.23:5000/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id: id, content: commentText, author: user.username })
     });
     setCommentText('');
-    fetch(`http://localhost:5000/api/comments/post/${id}`)
+    fetch(`http://20.5.129.23:5000/api/comments/post/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
@@ -147,7 +147,7 @@ function PostDetail({ user }) {
     }
 
     if (!window.confirm('모집에 신청하시겠습니까?')) return;
-    const res = await fetch(`http://localhost:5000/api/posts/${id}/apply`, {
+    const res = await fetch(`http://20.5.129.23:5000/api/posts/${id}/apply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_name: user.username })
@@ -172,7 +172,7 @@ function PostDetail({ user }) {
     }
     
     if (!window.confirm('신청을 취소하시겠습니까?')) return;
-    const res = await fetch(`http://localhost:5000/api/posts/${id}/cancel`, {
+    const res = await fetch(`http://20.5.129.23:5000/api/posts/${id}/cancel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_name: user.username })
@@ -210,7 +210,7 @@ function PostDetail({ user }) {
   const saveEditComment = async (commentId) => {
     if (!editCommentText.trim()) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+      const response = await fetch(`http://20.5.129.23:5000/api/comments/${commentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: editCommentText })
@@ -218,7 +218,7 @@ function PostDetail({ user }) {
       const data = await response.json();
       if (data.ok) {
         // 댓글 목록 다시 불러오기
-        fetch(`http://localhost:5000/api/comments/post/${id}`)
+        fetch(`http://20.5.129.23:5000/api/comments/post/${id}`)
           .then(res => res.json())
           .then(data => {
             if (data.ok) {
@@ -238,13 +238,13 @@ function PostDetail({ user }) {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+      const response = await fetch(`http://20.5.129.23:5000/api/comments/${commentId}`, {
         method: 'DELETE'
       });
       const data = await response.json();
       if (data.ok) {
         // 댓글 목록 다시 불러오기
-        fetch(`http://localhost:5000/api/comments/post/${id}`)
+        fetch(`http://20.5.129.23:5000/api/comments/post/${id}`)
           .then(res => res.json())
           .then(data => {
             if (data.ok) {
@@ -264,7 +264,7 @@ function PostDetail({ user }) {
       return;
     }
     
-    await fetch('http://localhost:5000/api/comments', {
+    await fetch('http://20.5.129.23:5000/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -280,7 +280,7 @@ function PostDetail({ user }) {
     setReplyToId(null);
     
     // 댓글 목록 새로고침
-    fetch(`http://localhost:5000/api/comments/post/${id}`)
+    fetch(`http://20.5.129.23:5000/api/comments/post/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
@@ -300,7 +300,7 @@ function PostDetail({ user }) {
     
     try {
       setLoadingApplicants(true);
-      const response = await fetch(`http://localhost:5000/api/posts/${id}/all-applicants?author=${encodeURIComponent(user.username)}`);
+      const response = await fetch(`http://20.5.129.23:5000/api/posts/${id}/all-applicants?author=${encodeURIComponent(user.username)}`);
       const data = await response.json();
       
       if (data.ok) {
