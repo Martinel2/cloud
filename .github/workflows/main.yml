@@ -40,6 +40,7 @@ jobs:
             cd /home/${{ secrets.AZURE_VM_USER }}/project
 
             # 필요한 환경 변수 파일 생성
+            echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
             echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" > .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
 
