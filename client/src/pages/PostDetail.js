@@ -909,7 +909,7 @@ function CommentTree({
                     background: '#e3f2fd', 
                     color: '#1976d2',
                     width: 74,
-                    height: 32,
+                     
                     border: 'none', 
                     borderRadius: 4, 
                     padding: '4px 8px', 
