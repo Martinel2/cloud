@@ -16,7 +16,7 @@ function Header({ user, onLogin, onLogout }) {
   return (
     <header style={{
       width: '100%',
-      background: 'linear-gradient(90deg, rgb(93, 185, 13) 80%, #fff 100%)',
+      background: 'linear-gradient(90deg, rgb(28, 170, 97) 80%, #fff 100%)',
       borderBottom: '4px solid #fff',
       display: 'flex',
       alignItems: 'center',
@@ -29,7 +29,7 @@ function Header({ user, onLogin, onLogout }) {
       boxShadow: '0 2px 8px #b0c4de',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', marginLeft: 36, cursor: 'pointer' }} onClick={() => navigate('/posts')}>
-        <img src="/logo512.png" alt="축구 로고" style={{ width: 54, filter: 'drop-shadow(0 2px 4px #2222)' }} />
+        <img src="/logo512.png" alt="축구 로고" style={{ width: 54, marginright: 8, filter: 'drop-shadow(0 2px 4px #2222)' }} />
         <span style={{
           fontFamily: 'GmarketSansBold, sans-serif',
           fontSize: 32,
