@@ -551,11 +551,12 @@ function PostDetail({ user }) {
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, color: '#2e7d32', fontSize: 24, fontWeight: 700 }}>신청자 목록</h3>
+              <h3 style={{ margin: 4, width: 150, textAlign: 'center', color: '#2e7d32', fontSize: 24, fontWeight: 700 }}>신청자 목록</h3>
               <button 
                 onClick={closeApplicantsModal}
                 style={{
                   background: 'transparent',
+                  width: 40,
                   border: 'none',
                   fontSize: 24,
                   cursor: 'pointer',
