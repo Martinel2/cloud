@@ -568,17 +568,34 @@ function PostDetail({ user }) {
             
             {applicants.length === 0 ? (
               <div style={{ 
-                padding: 24, 
+                padding: 36, 
                 textAlign: 'center', 
                 color: '#757575', 
                 borderRadius: 8, 
-                backgroundColor: '#f5f5f5' 
+                backgroundColor: '#f5f5f5',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 16
               }}>
-                신청자가 없습니다.
+                <div style={{ fontSize: 64, opacity: 0.3 }}>👥</div>
+                <div style={{ fontWeight: 500, fontSize: 18 }}>신청자가 없습니다.</div>
+                <div style={{ fontSize: 14, color: '#9e9e9e' }}>
+                  아직 이 모집글에 신청한 사람이 없습니다.<br />
+                  모집글이 더 많은 사람들에게 노출될 수 있도록 태그를 확인해 보세요.
+                </div>
               </div>
             ) : (
               <div>
-                <div style={{ marginBottom: 16, color: '#616161', fontSize: 16 }}>
+                <div style={{ 
+                  marginBottom: 16, 
+                  color: '#388e3c', 
+                  fontSize: 16, 
+                  fontWeight: 500,
+                  backgroundColor: '#e8f5e9',
+                  padding: '10px 16px',
+                  borderRadius: 8
+                }}>
                   총 <strong>{applicants.length}</strong>명이 신청했습니다.
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -600,22 +617,26 @@ function PostDetail({ user }) {
                       >
                         <td style={{ padding: '12px 16px', fontWeight: 500 }}>{applicant.user_name}</td>
                         <td style={{ padding: '12px 16px', color: '#757575' }}>
-                          {new Date(applicant.applied_at).toLocaleString()}
+                          {applicant.applied_at ? new Date(applicant.applied_at).toLocaleString() : '-'}
                         </td>
                         <td style={{ padding: '12px 16px' }}>
                           <button 
-                            onClick={async() => await navigateMessage(applicant.user_name, globalUser, navigate)}
+                            onClick={async() => await navigateMessage(applicant.user_name, user.username, navigate)}
                             style={{
-                              background: '#e3f2fd',
-                              color: '#1976d2',
+                              background: '#1976d2',
+                              color: 'white',
                               border: 'none',
-                              borderRadius: 4,
-                              padding: '6px 12px',
+                              borderRadius: 6,
+                              padding: '8px 14px',
                               fontSize: 14,
-                              cursor: 'pointer'
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 6
                             }}
                           >
-                            메시지 보내기
+                            <span style={{ fontSize: 14 }}>✉</span> 메시지 보내기
                           </button>
                         </td>
                       </tr>

@@ -226,7 +226,7 @@ router.get('/:id/all-applicants', async (req, res) => {
     
     // 신청자 목록 조회
     const [applicants] = await pool.query(
-      'SELECT * FROM post_applicants WHERE post_id = ? ORDER BY applied_at DESC',
+      'SELECT * FROM post_applicants WHERE post_id = ? ORDER BY id ASC',
       [postId]
     );
     
