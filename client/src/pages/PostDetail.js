@@ -196,6 +196,12 @@ function PostDetail({ user }) {
     setEditCommentText(content);
   };
 
+  // 댓글 수정 취소 함수
+  const cancelEditComment = () => {
+    setEditCommentId(null);
+    setEditCommentText('');
+  };
+
   //메세지로 이동
   async function navigateMessage(author, userId, navigate) {
     await setGlobalUser(userId);
@@ -349,7 +355,7 @@ function PostDetail({ user }) {
       overflow: 'hidden',
       minHeight: 600,
     }}>
-      <img src="https://cdn-icons-png.flaticon.com/512/861/861512.png" alt="축구공" style={{ width: 60, position: 'absolute', right: 32, top: 32, opacity: 0.13 }} />
+      <img src="https://cdn-icons-png.flaticon.com/512/861/861512.png" alt="축구공" style={{ width: 60, position: 'absolute', right: 32, top: 32, opacity: 0.13, zIndex: 1 }} />
       {/* 제목+라벨+수정/삭제 */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 18, gap: 16 }}>
         <span style={{
@@ -389,7 +395,9 @@ function PostDetail({ user }) {
                 ...editBtnStyle,
                 background: '#6a1b9a',
                 color: '#fff',
-                boxShadow: '0 2px 8px #ce93d8'
+                boxShadow: '0 2px 8px #ce93d8',
+                zIndex: 2,
+                position: 'relative'
               }}
               disabled={loadingApplicants}
             >
@@ -448,25 +456,28 @@ function PostDetail({ user }) {
         padding: 16, 
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
-        <CommentTree 
-          comments={comments} 
-          user={user} 
-          onEdit={handleEditComment} 
-          onDelete={handleDeleteComment}
-          editCommentId={editCommentId}
-          editCommentText={editCommentText}
-          setEditCommentText={setEditCommentText}
-          saveEditComment={saveEditComment}
-          replyToId={replyToId}
-          setReplyToId={setReplyToId}
-          replyText={replyText}
-          setReplyText={setReplyText}
-          handleReply={handleReply}
-          isPostAuthor={isAuthor}
-          globalUser={globalUser}
-          navigate={navigate}
-          navigateMessage={navigateMessage}
-        />
+        {post && comments.length > 0 && (
+          <CommentTree
+            comments={comments}
+            user={user}
+            onEdit={handleEditComment}
+            onDelete={handleDeleteComment}
+            editCommentId={editCommentId}
+            editCommentText={editCommentText}
+            setEditCommentText={setEditCommentText}
+            saveEditComment={saveEditComment}
+            cancelEditComment={cancelEditComment}
+            replyToId={replyToId}
+            setReplyToId={setReplyToId}
+            replyText={replyText}
+            setReplyText={setReplyText}
+            handleReply={handleReply}
+            isPostAuthor={isAuthor}
+            globalUser={globalUser}
+            navigate={navigate}
+            navigateMessage={navigateMessage}
+          />
+        )}
       </div>
       
       {/* 페이지네이션 */}
@@ -757,6 +768,7 @@ function CommentTree({
   editCommentText, 
   setEditCommentText,
   saveEditComment,
+  cancelEditComment,
   replyToId,
   setReplyToId,
   replyText,
@@ -794,20 +806,36 @@ function CommentTree({
               {!comment.is_deleted && user && comment.author === user.username && (
                 <>
                   {editCommentId === comment.id ? (
-                    <button 
-                      onClick={() => saveEditComment(comment.id)} 
-                      style={{ 
-                        background: '#4caf50', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: 4, 
-                        padding: '4px 8px', 
-                        fontSize: 13, 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      저장
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => saveEditComment(comment.id)} 
+                        style={{ 
+                          background: '#4caf50', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: 4, 
+                          padding: '4px 8px', 
+                          fontSize: 13, 
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        저장
+                      </button>
+                      <button 
+                        onClick={cancelEditComment} 
+                        style={{ 
+                          background: '#e3f2fd', 
+                          color: '#1976d2', 
+                          border: 'none', 
+                          borderRadius: 4, 
+                          padding: '4px 8px', 
+                          fontSize: 13, 
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        취소
+                      </button>
+                    </>
                   ) : (
                     <>
                       <button 
@@ -851,6 +879,8 @@ function CommentTree({
                     color: '#1b5e20', 
                     border: 'none', 
                     borderRadius: 4, 
+                    width: 144,
+                    height: 40,
                     padding: '4px 8px', 
                     fontSize: 13, 
                     cursor: 'pointer',
@@ -962,6 +992,7 @@ function CommentTree({
               editCommentText={editCommentText}
               setEditCommentText={setEditCommentText}
               saveEditComment={saveEditComment}
+              cancelEditComment={cancelEditComment}
               replyToId={replyToId}
               setReplyToId={setReplyToId}
               replyText={replyText}
