@@ -841,7 +841,8 @@ function CommentTree({
                       <button 
                         onClick={() => onEdit(comment.id, comment.content)} 
                         style={{ 
-                          background: '#f0f0f0', 
+                          background: 'rgb(198, 255, 187)', 
+                          color: '#36ba53',
                           border: 'none', 
                           borderRadius: 4, 
                           padding: '4px 8px', 
@@ -877,10 +878,10 @@ function CommentTree({
                   style={{ 
                     background: '#e8f5e9', 
                     color: '#1b5e20', 
+                    width: 74,
+                    height: 32,
                     border: 'none', 
                     borderRadius: 4, 
-                    width: 144,
-                    height: 40,
                     padding: '4px 8px', 
                     fontSize: 13, 
                     cursor: 'pointer',
@@ -906,7 +907,9 @@ function CommentTree({
                   }}
                   style={{ 
                     background: '#e3f2fd', 
-                    color: '#1976d2', 
+                    color: '#1976d2',
+                    width: 74,
+                    height: 32,
                     border: 'none', 
                     borderRadius: 4, 
                     padding: '4px 8px', 
