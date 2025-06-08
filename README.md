@@ -47,10 +47,22 @@ https://www.letdy.co.kr/#ee36ea499ede4023a5f30c6cdc839efb
 https://www.ddakple.com/main/index.php
 
 ## 프로젝트 개발 결과물 소개
-githubAction을 활용하여 지속적 배포를 통해 코드가 업데이트 될때마다 githubAction에 저장해둔 명령어들이 실행면서 자동으로 깃헙에서 업데이트된 코드를 받고 Docker Compose를 껐다 켜면서 업데이트가 되게합니다. 이렇게 Azure에 구축한 Linux 가상머신에 업데이트를 시켜주고, 가상머신에서는 Docker Compose를 통하여 node.js , react.js , nginx를 띄워줍니다. nginx로 리버스 프록싱을 하여 react.js, 즉 우리가 만든 사이트에 접근을 할 수 있고, react에서 api를 요청하면 node.js에서는 Azure MySQL server와 통신하며 DB를 관리합니다.
+githubAction을 활용하여 지속적 배포를 통해 코드가 업데이트 될때마다 githubAction에 저장해둔 명령어들이 실행면서 자동으로 깃헙에서 업데이트된 코드를 받고 Docker Compose를 껐다 켜면서 업데이트가 되게합니다.
+이렇게 Azure에 구축한 Linux 가상머신에 업데이트를 시켜주고, 가상머신에서는 Docker Compose를 통하여 node.js , react.js , nginx를 띄워줍니다.
+nginx로 리버스 프록싱을 하여 react.js, 즉 우리가 만든 사이트에 접근을 할 수 있고, react에서 api를 요청하면 node.js에서는 Azure MySQL server와 통신하며 DB를 관리합니다.
 
 ## 개발 결과물을 사용하는 방법 소개 (설치 방법, 동작 방법 등)
- playsoccer.zapto.org 로 접속
+ playsoccer.zapto.org 로 접속.
+ 초기화면(게시판) - 로그아웃시 게시글 열람 외 기능 사용 불가.
+ 모집중인 글만 볼 수 있는 필터 적용.
+ 로그인 및 회원가입.
+ 게시글 작성(카테고리를 나누고 제목 및 내용 작성)
+ 자신의 글은 수정 및 삭제가 가능하고, 신청한 인원 확인 및 메시지 보내기 가능.
+ 타인의 글은 댓글 및 작성자에게 메시지 보내기가 가능하고, 작성자는 댓글에 답글이 가능.
+ 타인의 모집글에서 모집신청 버튼 클릭 시 모집 신청이 되고, 작성자는 이를 확인 가능하며, 자동으로 모집인원 조절, 모집 인원이 다 차면 자동으로 모집 종료.
+ 모집종료시까지 신청한 모집은 취소 가능.
+ 채팅기능 - 채팅방 및 개인간 채팅.
+ 로그아웃.
 
 ## 개발 결과물의 활용방안 소개
 - 게시판 기능을 활용한 자유로운 모집 가능.
