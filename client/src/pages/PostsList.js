@@ -44,7 +44,16 @@ function PostsList({ user }) {
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
-          setPosts(data.posts || []);
+          let filteredPosts = data.posts || [];
+          
+          if (showRecruiting) {
+            filteredPosts = filteredPosts.filter(post => 
+              post.is_recruiting === true || post.is_recruiting === 1 || post.is_recruiting === '1'
+            );
+          }
+          
+          console.log('필터링된 게시물:', filteredPosts.length, '개');
+          setPosts(filteredPosts);
         }
       })
       .catch(err => console.error('게시글 목록 조회 오류:', err));
