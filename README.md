@@ -3,9 +3,8 @@
 # 축구 인원 모집 웹 사이트
 
 ## 기술 스택
-- react.js
-- node.js
-- docker
+- React.js
+- Node.js
 - Azure
 - nginx
 - Docker Compose
